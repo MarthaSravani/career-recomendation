@@ -1,14 +1,19 @@
 import { useState } from "react";
-import { getCareers } from "../api";
+import { getCareerRecommendation } from "../api/apiClient";
 
 export default function CareerForm() {
   const [skills, setSkills] = useState("");
-  const [result, setResult] = useState([]);
+  const [result, setResult] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await getCareers({ skills });
-    setResult(response.careers || []);
+
+    try {
+      const response = await getCareerRecommendation({ skills });
+      setResult(response.career); // the Flask API returns a single "career"
+    } catch (error) {
+      console.error("Error fetching recommendation:", error);
+    }
   };
 
   return (
@@ -22,17 +27,13 @@ export default function CareerForm() {
           onChange={(e) => setSkills(e.target.value)}
         ></textarea>
 
-        <button type="submit">Get Career Recommendations</button>
+        <button type="submit">Get Career Recommendation</button>
       </form>
 
-      {result.length > 0 && (
+      {result && (
         <div className="result">
-          <h3>Recommended Careers:</h3>
-          <ul>
-            {result.map((career, index) => (
-              <li key={index}>{career}</li>
-            ))}
-          </ul>
+          <h3>Recommended Career:</h3>
+          <p>{result}</p>
         </div>
       )}
     </div>
